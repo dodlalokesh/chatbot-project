@@ -1,28 +1,27 @@
-from flask import Flask, request, jsonify
+from flask import Flask, render_template
+from flask_socketio import SocketIO, emit, join_room
 
 app = Flask(__name__)
-
-courses = {
-    "aws": "AWS Solutions Architect",
-    "devops": "DevOps Master Program",
-    "python": "Python Full Course",
-    "kubernetes": "Certified Kubernetes Administrator"
-}
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 @app.route("/")
 def home():
-    return "Chatbot Running Successfully"
+    return render_template("index.html")
 
-@app.route("/chat", methods=["POST"])
-def chat():
-    data = request.json
-    msg = data.get("message","").lower()
+@socketio.on("join")
+def join(data):
+    join_room(data["room"])
+    emit("message", {
+        "user": "System",
+        "msg": f"{data['username']} joined {data['room']}"
+    }, to=data["room"])
 
-    for key in courses:
-        if key in msg:
-            return jsonify({"response": courses[key]})
-
-    return jsonify({"response":"Ask about AWS, DevOps, Python or Kubernetes"})
+@socketio.on("send_message")
+def send(data):
+    emit("message", {
+        "user": data["username"],
+        "msg": data["message"]
+    }, to=data["room"])
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    socketio.run(app, host="0.0.0.0", port=5000)
