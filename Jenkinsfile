@@ -41,16 +41,18 @@ pipeline {
         }
 
         stage('Deploy To Kubernetes') {
-            steps {
-                sh '''
-                kubectl apply -f k8s/deployment.yaml
-                kubectl apply -f k8s/service.yaml
+    steps {
+        sh '''
+        kubectl apply -f k8s/service.yaml
+        kubectl apply -f k8s/deployment.yaml
+        kubectl apply -f k8s/ingress.yaml
 
-                kubectl rollout restart deployment chatbot-deployment
-                kubectl get pods
-                '''
-            }
-        }
+        kubectl get pods
+        kubectl get svc
+        kubectl get ingress
+        '''
+    }
+}
 
         stage('Verify Deployment') {
             steps {
@@ -58,6 +60,7 @@ pipeline {
                 kubectl get deployments
                 kubectl get pods
                 kubectl get svc
+		kubectl get ingress
                 '''
             }
         }
