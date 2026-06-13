@@ -4,6 +4,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "lokeshreddy45/chatbot-app"
+        KUBECONFIG = "/var/lib/jenkins/.kube/config"
     }
 
     stages {
@@ -22,9 +23,7 @@ pipeline {
         }
 
         stage('Docker Login & Push') {
-
             steps {
-
                 withCredentials([
                     usernamePassword(
                         credentialsId: 'dockerhub-creds',
@@ -35,7 +34,6 @@ pipeline {
 
                     sh '''
                     echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-
                     docker push $IMAGE_NAME:latest
                     '''
                 }
@@ -44,12 +42,11 @@ pipeline {
 
         stage('Deploy To Kubernetes') {
             steps {
-
                 sh '''
+                export KUBECONFIG=/var/lib/jenkins/.kube/config
+
                 kubectl apply -f k8s/deployment.yaml
-
                 kubectl apply -f k8s/service.yaml
-
                 kubectl rollout restart deployment chatbot-deployment
                 '''
             }
