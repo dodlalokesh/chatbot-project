@@ -43,11 +43,21 @@ pipeline {
         stage('Deploy To Kubernetes') {
             steps {
                 sh '''
-                export KUBECONFIG=/var/lib/jenkins/.kube/config
-
                 kubectl apply -f k8s/deployment.yaml
                 kubectl apply -f k8s/service.yaml
+
                 kubectl rollout restart deployment chatbot-deployment
+                kubectl get pods
+                '''
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh '''
+                kubectl get deployments
+                kubectl get pods
+                kubectl get svc
                 '''
             }
         }
