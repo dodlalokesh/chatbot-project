@@ -3,7 +3,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "lokeshreddy45/chatbot-app"
+        IMAGE_NAME = "lokeshreddy45/chatbot"
         KUBECONFIG = "/var/lib/jenkins/.kube/config"
     }
 
